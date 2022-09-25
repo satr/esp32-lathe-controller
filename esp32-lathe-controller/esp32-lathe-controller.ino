@@ -7,12 +7,13 @@
 //First get LCD I2C address (here "0x27") with a scketch from https://randomnerdtutorials.com/esp32-esp8266-i2c-lcd-arduino-ide/
 LiquidCrystal_I2C_Hangul lcd(0x27,16,2); 
 
-int rpmRegulator = 34;         // select the input pin for the potentiometer
+int pulseRegulator = 34;         // select the input pin for the potentiometer
 int ledPin = LED_BUILTIN;      // select the pin for the LED
 int servoMotorSpeed = 14;      // select the pin for the servo motor speed control
 
-int rpmRegulatorValue = 0;
-int rpmLastRegulatorValue = 0;
+float pulseRegulatorValue = 0;
+float pulseLastRegulatorValue = 0;
+int pulsesPerRevolution = 800;
 
 Pwm pwm = Pwm();
 
@@ -37,16 +38,16 @@ void loop() {
 }
 
 void applyRegulatorValue() {
-  rpmRegulatorValue = analogRead(rpmRegulator) / 4; //the analog value is in range 0 - 4096
-                                                    //the rpmRegulatorValue is in range 0 - 1024
-  if(abs(rpmLastRegulatorValue - rpmRegulatorValue) > 1) { //only update with change above noise
-    rpmLastRegulatorValue = rpmRegulatorValue;
-    pwm.writeFrequency(servoMotorSpeed, rpmRegulatorValue);
-    displayRpm();
+  pulseRegulatorValue = analogRead(pulseRegulator) * 10; //the analog value is in range 0 - 4096
+                                                    //the pulseRegulatorValue is in range 0 - 40960
+  if(abs(pulseLastRegulatorValue - pulseRegulatorValue) > 1) { //only update with change above noise
+    pulseLastRegulatorValue = pulseRegulatorValue;
+    pwm.writeFrequency(servoMotorSpeed, pulseRegulatorValue);
+    displayPulseAndRpm();
   }
 }
 
-void displayRpm() {
+void displayPulseAndRpm() {
   lcd.setCursor(0, 0);
-  lcd.printf("RPM:%-4d", rpmRegulatorValue);
+  lcd.printf("Pulse:%-5g RPM:%-4.0f", pulseRegulatorValue, pulseRegulatorValue / 12);
 }
