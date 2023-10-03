@@ -28,6 +28,7 @@ void setup() {
   pwm.write(servoMotorSpeed, 341);
   pwm.writeFrequency(servoMotorSpeed, 100);
 
+  displayPulseAndRpm();
   applyRegulatorValue();
 }
 
